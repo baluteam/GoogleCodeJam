@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.google.codejam.year2018.onlinequalification;
+package com.google.codejam.year2018.onlinequalification.savingtheuniverseagain01;
 
 import java.util.*;
 import java.io.*;
