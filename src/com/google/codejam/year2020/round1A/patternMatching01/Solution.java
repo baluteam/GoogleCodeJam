@@ -7,6 +7,7 @@ package com.google.codejam.year2020.round1A.patternMatching01;
 
 import java.util.*;
 import java.io.*;
+import java.util.regex.Pattern;
 
 /*
 Problem
@@ -69,38 +70,38 @@ In Sample Case #2, there is no acceptable name, so the answer is *.
 
 The following cases could not appear in Test Set 1, but could appear in Test Set 2 or Test Set 3:
 
-  4
-  H*O
-  HELLO*
-  *HELLO
-  HE*
+4
+H*O
+HELLO*
+*HELLO
+HE*
 HELLO and HELLOGOODBYEHELLO are examples of acceptable answers. OTHELLO and HELLOO would not be acceptable.
 
-  2
-  CO*DE
-  J*AM
+2
+CO*DE
+J*AM
 There is no name that matches both patterns, so the answer would be *.
 
-  2
-  CODE*
-  *JAM
+2
+CODE*
+*JAM
 CODEJAM is one example of an acceptable answer.
 
 The following cases could not appear in Test Set 1 or Test Set 2, but could appear in Test Set 3:
 
-  2
-  A*C*E
-  *B*D*
+2
+A*C*E
+*B*D*
 ABCDE and ABUNDANCE are among the possible acceptable answers, but BOLDFACE is not.
 
-  2
-  A*C*E
-  *B*D
+2
+A*C*E
+*B*D
 There is no name that matches both patterns, so the answer would be *.
 
-  2
-  **Q**
-  *A*
+2
+**Q**
+*A*
 QUAIL and AQ are among the possible acceptable answers here.
 
 MY TEST INPUTS:
@@ -147,10 +148,9 @@ A*C*E
 @see https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b3034
 */
 public class Solution {
+    private static final boolean LOCAL_TESTING = false;
     private static final String OUTPUT_FORMAT = "Case #%d: %s"; //Use with String.format - 1.: number of the test case, 2.: solution
     private static final String ASTERISK = "*";
-    private static final char ASTERISK_CH = '*';
-    private static final String ASTERISK_PLACEHOLDER = "";
     
     public static void main(String[] args) {
         Scanner in = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
@@ -159,120 +159,209 @@ public class Solution {
 test:   for (int currentTestCase = 1; currentTestCase <= T; currentTestCase++) {
             final int N = in.nextInt(); //number of patterns
             in.nextLine();
-            final String[] PATTERNS = new String[N];
-            final List<String[]> PATTERN_PARTS = new ArrayList();
-            for(int pi=0; pi<N; pi++) {
-                PATTERNS[pi] = in.nextLine().trim();
-                List<String> patternPartsExtended = new ArrayList();
-                char[] patternChars = PATTERNS[pi].toCharArray();
-                String lastValue = null;
-                for(char pChar : patternChars) {
-                    //testPrint("char: " + pChar);
-                    if(pChar == ASTERISK_CH) {
-                        patternPartsExtended.add(ASTERISK_PLACEHOLDER);
-                        lastValue = null;
-                        //testPrint("ASTERISK " + Arrays.toString(patternPartsExtended.toArray()));
-                        continue;
-                    }
-                    if(lastValue == null) {
-                        //if last element in the list was a placeholder for an asterisk
-                        lastValue = String.valueOf(pChar);
-                        patternPartsExtended.add(lastValue);
+            testPrintln("Test " + currentTestCase + ".: with " + N + " patterns.");
+            String firstPart = null;
+            List<String> middleParts = new ArrayList();
+            String lastPart = null;
+            boolean noSolution = false;
+pattern:    for(int pi=0; pi<N; pi++) {
+                String pattern = in.nextLine().trim();
+                if(noSolution) {
+                    //if we set it already, that there is no solution for this case, we still have to read in the rest of the patterns and output our answer only after that
+                    continue;
+                }
+                String restOfPattern = pattern;
+                //start solution
+                testPrintln("Pattern " + (pi) + ".: '" + pattern + "'");
+// BLABLA*
+                if(!pattern.startsWith(ASTERISK)) {
+                    int indexOfFirstAsterisk = pattern.indexOf(ASTERISK);
+                    String firstPart_pi = pattern.substring(0, indexOfFirstAsterisk);
+                    testPrintln("Solution has to start with: " + firstPart_pi);
+                    if(pattern.length() <= indexOfFirstAsterisk + 1) {
+                        //first astersik was the last character, there is nothing left after it to handle
+                        restOfPattern = "";
+                        testPrintln("There is nothing left from the pattern");
                     }
                     else {
-                        //otherwise we add this next char to the previous value
-                        lastValue += pChar;
-                        patternPartsExtended.set((patternPartsExtended.size()-1), lastValue);
+                        restOfPattern = pattern.substring(indexOfFirstAsterisk+1, pattern.length());
+                        testPrintln("Rest of the pattern to be handled: '" + restOfPattern + "'");
                     }
-                    //testPrint(Arrays.toString(patternPartsExtended.toArray()));
-                }
-                PATTERN_PARTS.add(patternPartsExtended.toArray(new String[patternPartsExtended.size()]));
-            }
-            //start solution
-            StringBuilder sb = new StringBuilder();
-            //patterns order does not matter, so lets sort it according to the pattern parts and the length of those
-            Comparator<String[]> comparator = (String[] p1, String[] p2) -> {
-                if(p1.length != p2.length) {
-                    //if p2 has more pattern parts, we want it before p1, thus p1 has to get a positive compare value compared to p2
-                    return (p1.length < p2.length) ? +1 : -1;
-                }
-                for(int i=0; i<p1.length; i++) {
-                    if(p1[i].length() != p2[i].length()) {
-                        //if p2 has more characters, then we want it before p1, that is p1 has to get a positive value
-                        return (p1[i].length() < p2[i].length()) ? +1 : -1;
-                    }
-                }
-                //the pattern parts and the pattern part words are of same length
-                return 0;
-            };
-//*
-            PATTERN_PARTS.forEach((pi) -> {
-                testPrint(Arrays.toString(pi));
-            });
-//*/
-            Collections.sort(PATTERN_PARTS, comparator);
-//*
-            testPrint("Sorted");
-            PATTERN_PARTS.forEach((pi) -> {
-                testPrint(Arrays.toString(pi));
-            });
-//*/
-            //add the first parts into our matcher string array
-            String[] bestMatches = PATTERN_PARTS.get(0);
-            int bestStartMatchI, bestEndMatchI;
-            int startMatchI, endMatchI;
-            for(int i=1; i<PATTERN_PARTS.size(); i++) {
-                String[] pi = PATTERN_PARTS.get(i);
-                bestStartMatchI = 0;
-                bestEndMatchI = bestMatches.length - 1;
-                startMatchI = 0;
-                endMatchI = pi.length - 1;
-                while(bestStartMatchI <= bestEndMatchI && startMatchI <= endMatchI) {
-                    testPrint("(" + bestStartMatchI + "," + startMatchI + ") - " + "'" + bestMatches[bestStartMatchI] + "' startsWith '" + pi[startMatchI] + "'?");
-                    if(bestMatches[bestStartMatchI].startsWith(pi[startMatchI])) {
-                        //this is fine, our best match from the beginning contains and ends with the current pattern from the beginning
-                        testPrint("yes");
-                    }
-                    else if(pi[startMatchI].startsWith(bestMatches[bestStartMatchI])) {
-                        //our current pattern from the beginning contains and ends with our best match from the beginning, we need to swap
-                        bestMatches[bestStartMatchI] = pi[startMatchI];
-                        testPrint("swap and yes");
+                    testPrintln("Solution before: " + getCurrentSolutionAsList(firstPart, middleParts, lastPart).toString());
+                    if(firstPart == null) {
+                        //no start pattern is stored yet
+                        firstPart = firstPart_pi;
                     }
                     else {
-                        //beginning or end does not match, there is no solution
-                        System.out.println(String.format(OUTPUT_FORMAT, currentTestCase, ASTERISK));
-                        continue test;
+                        if(firstPart.startsWith(firstPart_pi)) {
+                            //"BLABLA".startsWith("BLA"), then we are fine
+                        }
+                        else if(firstPart_pi.startsWith(firstPart)) {
+                            //we need to swap the first part, the previous starts with and is included in this current part
+                            firstPart = firstPart_pi;
+                        }
+                        else {
+                            //the current first part has to start like firtPart for this pattern, but it just does not fit with the previous starting pattern part
+                            //System.out.println(String.format(OUTPUT_FORMAT, currentTestCase, ASTERISK));
+                            //continue test;
+                            noSolution = true;
+                            continue pattern;
+                        }
                     }
-                    testPrint("(" + bestEndMatchI + "," + endMatchI + ") - " + "'" + bestMatches[bestEndMatchI] + "' endsWith '" + pi[endMatchI] + "'?");
-                    if(bestMatches[bestEndMatchI].endsWith(pi[endMatchI])) {
-                        //this is fine, our best match from the end contains and ends with the current pattern from the end
-                        testPrint("yes");
+                    testPrintln("Solution after: " + getCurrentSolutionAsList(firstPart, middleParts, lastPart).toString());
+                } // end of if starts like  BLABLA*
+// *BLABLA
+                if(!restOfPattern.endsWith(ASTERISK) && !"".equals(restOfPattern)) { //if the rest does not end with asterisk
+                    if(!restOfPattern.contains(ASTERISK)) { //but there is no asterisk in it left
+                        testPrintln("There was only 1 asterisk in this (rest of the) pattern.");
+                        if(lastPart == null) {
+                            //no end pattern is stored yet
+                            lastPart = restOfPattern;
+                        }
+                        else {
+                            if(lastPart.endsWith(restOfPattern)) {
+                                //"BLABLA".endsWith("BLA"), then we are fine
+                            }
+                            else if(restOfPattern.endsWith(lastPart)) {
+                                //we need to swap the last part, the previous ends with and is included in this current part
+                                lastPart = restOfPattern;
+                            }
+                            else {
+                                //the current rest part has to end like lastPart for this pattern, but it just does not fit with the previous ending pattern part
+                                //System.out.println(String.format(OUTPUT_FORMAT, currentTestCase, ASTERISK));
+                                //continue test;
+                                noSolution = true;
+                                continue pattern;
+                            }
+                        }
                     }
-                    else if(pi[endMatchI].endsWith(bestMatches[bestEndMatchI])) {
-                        //our current pattern from the end contains and ends with our best match from the end, we need to swap
-                        bestMatches[bestEndMatchI] = pi[endMatchI];
-                        testPrint("swap and yes");
+                    int indexOfLastAsterisk = restOfPattern.lastIndexOf(ASTERISK);
+                    //there has to be at least one char after the last asterisk because of this if condition
+                    String lastPart_pi = restOfPattern.substring(indexOfLastAsterisk+1, restOfPattern.length());
+                    testPrintln("Solution has to end with: " + lastPart_pi);
+                    if(indexOfLastAsterisk - 1 < 0) {
+                        //last astersik was the first character, there is nothing left before it to handle
+                        restOfPattern = "";
+                        testPrintln("There is nothing before the pattern");
                     }
                     else {
-                        //beginning or end does not match, there is no solution
-                        System.out.println(String.format(OUTPUT_FORMAT, currentTestCase, ASTERISK));
-                        continue test;
+                        restOfPattern = restOfPattern.substring(0, indexOfLastAsterisk);
+                        testPrintln("Rest of the pattern to be handled: '" + restOfPattern + "'");
                     }
-                    bestStartMatchI++;
-                    bestEndMatchI--;
-                    startMatchI++;
-                    endMatchI--;
-                }
-            } //end of iterating over all patterns
-            for(String p : bestMatches) {
-                sb.append(p);
-            }
+                    testPrintln("Solution before: " + getCurrentSolutionAsList(firstPart, middleParts, lastPart).toString());
+                    if(lastPart == null) {
+                        //no end pattern is stored yet
+                        lastPart = lastPart_pi;
+                    }
+                    else {
+                        if(lastPart.endsWith(lastPart_pi)) {
+                            //"BLABLA".endsWith("BLA"), then we are fine
+                        }
+                        else if(lastPart_pi.endsWith(lastPart)) {
+                            //we need to swap the last part, the previous ends with and is included in this current part
+                            lastPart = lastPart_pi;
+                        }
+                        else {
+                            //the current last part has to start like lastPart for this pattern, but it just does not fit with the previous ending pattern part
+                            //System.out.println(String.format(OUTPUT_FORMAT, currentTestCase, ASTERISK));
+                            //continue test;
+                            noSolution = true;
+                            continue pattern;
+                        }
+                    }
+                    testPrintln("Solution after: " + getCurrentSolutionAsList(firstPart, middleParts, lastPart).toString());
+                } //end of if ends like *BLABLA
+                //the rest is/was between asterisks like *BLABLABLA*, so we just need to split and append them
+                testPrintln("Rest of the pattern between the first and last asterisk: '" + restOfPattern + "'");
+                if(!"".equals(restOfPattern.trim())) {
+                    testPrintln("Solution before: " + getCurrentSolutionAsList(firstPart, middleParts, lastPart).toString());
+                    String[] restOfPatternsFromTheMiddle = restOfPattern.split(Pattern.quote(ASTERISK));
+                    for(String rest : restOfPatternsFromTheMiddle) {
+                        if(!"".equals(rest.trim())) {
+                            middleParts.add(rest);
+                        }
+                    }
+                    testPrintln("Solution after: " + getCurrentSolutionAsList(firstPart, middleParts, lastPart).toString());
+                } //end adding the middle parts
+            } //end of reading in the patterns
             //end solution
-            System.out.println(String.format(OUTPUT_FORMAT, currentTestCase, sb.toString()));
+            if(noSolution) {
+                System.out.println(String.format(OUTPUT_FORMAT, currentTestCase, ASTERISK));
+            }
+            else {
+                printSolution(currentTestCase, firstPart, middleParts, lastPart);
+            }
         } //end of test cases
     } //end of main
     
-    private static void testPrint(String s) {
-        //System.out.println(s);
+    /**
+     * Helper method to get back the current solution as a list.
+     * 
+     * @param firstPart
+     * @param middleParts
+     * @param lastPart
+     * @return 
+     */
+    private static List<String> getCurrentSolutionAsList(String firstPart, List<String> middleParts, String lastPart) {
+        List<String> currentSolution = new ArrayList();
+        currentSolution.add((firstPart == null) ? "" : firstPart);
+        if(middleParts != null) {
+            middleParts.forEach(middlePart -> {
+                currentSolution.add((middlePart == null) ? "" : middlePart);
+            });
+        }
+        currentSolution.add((lastPart == null) ? "" : lastPart);
+        return currentSolution;
+    }
+    
+    /**
+     * Helper method to get back the current pattern parts.
+     * 
+     * @param firstPart
+     * @param middleParts
+     * @param lastPart
+     * @return 
+     */
+    private static String getCurrentSolution(String firstPart, List<String> middleParts, String lastPart) {
+        StringBuilder sb = new StringBuilder();
+        sb.append((firstPart == null) ? "" : firstPart);
+        if(middleParts != null) {
+            middleParts.forEach(pattern -> {
+                sb.append(pattern);
+            });
+        }
+        sb.append((lastPart == null) ? "" : lastPart);
+        return sb.toString();
+    }
+    
+    /**
+     * Helper method to print out the solution. 
+     * 
+     * @param currentTestCase
+     * @param firstPart
+     * @param middleParts
+     * @param lastPart 
+     */
+    private static void printSolution(int currentTestCase, String firstPart, List<String> middleParts, String lastPart) {
+        System.out.println(String.format(OUTPUT_FORMAT, currentTestCase, getCurrentSolution(firstPart,middleParts,lastPart)));
+    }
+    
+    /**
+     * Helper method to print text while locally testing but easily switching it off in the Code Jam submission
+     * @param s 
+     */
+    protected static void testPrintln(String s) {
+        if(LOCAL_TESTING) {
+            System.out.println(s);
+        }
+    }
+    /**
+     * Helper method to print text while locally testing but easily switching it off in the Code Jam submission
+     * @param s 
+     */
+    protected static void testPrint(String s) {
+        if(LOCAL_TESTING) {
+            System.out.print(s);
+        }
     }
 }
