@@ -15,7 +15,8 @@ My Google Code Jam template file solution.
 */
 public class Solution {
     private static final boolean LOCAL_TESTING = true;
-    private static final String OUTPUT_FORMAT = "Case #%d: %d %s"; //Use with String.format - 1.: number of the test case, 2.: some number, 3.: some string
+    private static final boolean LOCAL_TESTING_SOLUTION = true;
+    private static final String OUTPUT_FORMAT = "Case #%d: %s"; //Use with String.format - 1.: number of the test case, 2.: some string
     private static final String SEPARATOR = " ";
     
     public static void main(String[] args) {
@@ -25,9 +26,42 @@ public class Solution {
 test:   for (int currentTestCase = 1; currentTestCase <= T; currentTestCase++) {
             final int N = in.nextInt(); //some number
             in.nextLine();
-            System.out.println(String.format(OUTPUT_FORMAT, currentTestCase, 1, "TEST"));
+            StringBuilder sb = new StringBuilder();
+            //System.out.println(String.format(OUTPUT_FORMAT, currentTestCase, "TEST"));
+            printSolution((N+""), currentTestCase, sb.toString());
         } //end of test cases
     } //end of main
+    
+    /**
+     * Helper method to print the solution and locally to test the expected values.
+     * 
+     * @param input the whole input under the testcase concatenated or passed over in any format
+     * @param currentTestCase
+     * @param solution 
+     */
+    protected static void printSolution(String input, int currentTestCase, String solution) {
+        if(!LOCAL_TESTING_SOLUTION) { //solution for the contest
+            System.out.println(String.format(OUTPUT_FORMAT, currentTestCase, solution));
+        }
+        else {
+            System.out.print(String.format(OUTPUT_FORMAT, currentTestCase, solution));
+            //TODO feel free to extend the solution with checking expected values
+            String expected;
+            if("2 3".equals(input)) {
+                expected = "SEN";
+                System.out.print(" <-- " + (expected.equals(solution) ? "OK" : "NOT OK") + " | '" + expected + "' was expected for input: " + input);
+            }
+            else if("3 2".equals(input)) {
+                expected = "WNE";
+                System.out.print(" <-- " + (expected.equals(solution) ? "OK" : "NOT OK") + " | '" + expected + "' was expected for input: " + input);
+            }
+            else if("-1 1".equals(input)) {
+                expected = "IMPOSSIBLE";
+                System.out.print(" <-- " + (expected.equals(solution) ? "OK" : "NOT OK") + " | '" + expected + "' was expected for input: " + input);
+            }
+            System.out.println();
+        }
+    }
     
     /**
      * Helper method to print text while locally testing but easily switching it off in the Code Jam submission
