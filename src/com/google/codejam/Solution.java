@@ -49,17 +49,17 @@ test:   for (int currentTestCase = 1; currentTestCase <= T; currentTestCase++) {
             String expected;
             if("2 3".equals(input)) {
                 expected = "SEN";
-                System.out.print(" <-- " + (expected.equals(solution) ? "OK" : "NOT OK") + " | '" + expected + "' was expected for input: " + input);
+                testPrint(" <-- " + (expected.equals(solution) ? "OK" : "NOT OK") + " | '" + expected + "' was expected for input: " + input);
             }
             else if("3 2".equals(input)) {
                 expected = "WNE";
-                System.out.print(" <-- " + (expected.equals(solution) ? "OK" : "NOT OK") + " | '" + expected + "' was expected for input: " + input);
+                testPrint(" <-- " + (expected.equals(solution) ? "OK" : "NOT OK") + " | '" + expected + "' was expected for input: " + input);
             }
             else if("-1 1".equals(input)) {
                 expected = "IMPOSSIBLE";
-                System.out.print(" <-- " + (expected.equals(solution) ? "OK" : "NOT OK") + " | '" + expected + "' was expected for input: " + input);
+                testPrint(" <-- " + (expected.equals(solution) ? "OK" : "NOT OK") + " | '" + expected + "' was expected for input: " + input);
             }
-            System.out.println();
+            testPrintln("");
         }
     }
     
