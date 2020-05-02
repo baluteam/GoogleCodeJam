@@ -69,7 +69,8 @@ test:   for (int currentTestCase = 1; currentTestCase <= T; currentTestCase++) {
      */
     protected static void testPrintln(String s) {
         if(LOCAL_TESTING) {
-            System.out.println(s);
+            System.err.println(s); //to print the debug messages with different colors
+            System.err.flush(); //without flushing it, err and out might be mixed
         }
     }
     /**
@@ -78,7 +79,8 @@ test:   for (int currentTestCase = 1; currentTestCase <= T; currentTestCase++) {
      */
     protected static void testPrint(String s) {
         if(LOCAL_TESTING) {
-            System.out.print(s);
+            System.err.print(s); //to print the debug messages with different colors
+            System.err.flush(); //without flushing it, err and out might be mixed
         }
     }
 }
