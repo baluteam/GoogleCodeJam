@@ -128,6 +128,8 @@ public class Solution {
         final int T = in.nextInt(); //number of test cases
         in.nextLine();
 test:   for (int currentTestCase = 1; currentTestCase <= T; currentTestCase++) {
+            //TODO if it moves towards me and 1 < distanceX && 1 < distanceY, I move the opposite as it?
+    
             final int X = in.nextInt(); //x blocks EAST away from my start position
             final int Y = in.nextInt(); //y blocks NORTH away from my start position
             final String CAT_PATH = in.nextLine().trim();
